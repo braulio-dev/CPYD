@@ -2,8 +2,6 @@
 #include<memory>
 #include<thread>
 #include<string>
-#include<mutex>
-#include<condition_variable>
 #include<cstdlib>
 #include<ctime>
 #include<vector>
@@ -13,7 +11,6 @@ class Summator {
 private:
     std::string name;
     int sum;
-    std::mutex sumMutex;
 public:
     Summator(std::string threadName) : name(threadName), sum(0) {
         
@@ -26,13 +23,10 @@ public:
             int randomNum = (rand() % 1000) + 1;
             localSum += randomNum;
         }
+
+        sum = localSum;
         
-        // asignar el resultado al miembro sum
-        {
-            std::lock_guard<std::mutex> lock(sumMutex);
-            sum = localSum;
-        }
-        std::cout << name << " sumó 100 números aleatorios. Total: " << sum << std::endl;
+        printf("%s sumó 100 números aleatorios. Total: %d\n", name.c_str(), sum);
     }
 
     int getSum() const {
@@ -59,8 +53,9 @@ int main() {
     
     // crear threads usando for loop
     for (int i = 0; i < 10; i++) {
-        threads.emplace_back([&summators, i]() { 
-            summators[i]->calculateSum(); 
+        int threadIndex = i;  // Capture the current value of i
+        threads.emplace_back([&summators, threadIndex]() { 
+            summators[threadIndex]->calculateSum(); 
         });
     }
     
@@ -82,8 +77,7 @@ int main() {
               });
     
     // mostrar solo el primero (el de mayor puntuación)
-    std::cout << "El thread con puntuación más alta es: " 
-              << threadPtrs[0]->getName() << " con un total de " << threadPtrs[0]->getSum() << std::endl;
-
+    printf("El thread con puntuación más alta es: %s con un total de %d\n", 
+           threadPtrs[0]->getName().c_str(), threadPtrs[0]->getSum());
     return 0;
 }
