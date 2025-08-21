@@ -53,7 +53,7 @@ int main() {
     
     // crear threads usando for loop
     for (int i = 0; i < 10; i++) {
-        int threadIndex = i;  // Capture the current value of i
+        int threadIndex = i;
         threads.emplace_back([&summators, threadIndex]() { 
             summators[threadIndex]->calculateSum(); 
         });
